@@ -6,8 +6,6 @@ firebase.initializeApp({
     storageBucket: "firepaste-71d3b.appspot.com",
     messagingSenderId: "754135541208"
 });
-
-
 const DB = firebase.database();
 const AUTH = firebase.auth();
 
@@ -77,13 +75,15 @@ const setupPaest = (state) => new Promise((accept) => {
             console.log(response.val());
             if (response.val() === null) newPaest();
             else {
-                accept(state);
+                if(response.val().author != state.user.uid) 
+                    return listenToPaest(state);
+                return writeToPaest(state);
             }
         });
     }
 });
 
-const setupAutosave = (state) => new Promise((accept) => {
+const writeToPaest = (state) => new Promise((accept) => {
     let savingTimer = 0;
     state.editor.on('input', () => {
         clearTimeout(savingTimer);
@@ -91,11 +91,17 @@ const setupAutosave = (state) => new Promise((accept) => {
             DB.ref('paests').child(state.paestId).set({
                 author: state.user.uid,
                 text: state.editor.getValue()
-            })
+            });
         }, 1000);
     });
 });
 
+const listenToPaest = (state) => new Promise((accept)=>{
+    state.editor.setReadOnly(true);
+    DB.ref('paests').child(state.paestId).on('value', (response)=>{
+        state.editor.setValue(response.val().text, -1);
+    });
+});
 
 
 const state = {};
@@ -103,5 +109,4 @@ Promise.resolve(state)
     .then(setupEditor)
     .then(setupControls)
     .then(setupFirebase)
-    .then(setupPaest)
-    .then(setupAutosave);
+    .then(setupPaest);
