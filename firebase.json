@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "paests":{
+    	"$paestId": {
+        ".read":true,
+        ".write": "!data.exists() || auth.uid === data.child('author').val()",
+        "author": {
+         	".validate": "newData.isString()"
+        },
+        "text": {
+          ".validate": "newData.isString()"
+        },
+      }
+    }
+  }
+}
