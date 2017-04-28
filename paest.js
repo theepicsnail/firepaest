@@ -75,6 +75,7 @@ const setupPaest = (state) => new Promise((accept) => {
             console.log(response.val());
             if (response.val() === null) newPaest();
             else {
+                state.editor.setValue(response.val().text, -1);
                 if(response.val().author != state.user.uid) 
                     return listenToPaest(state);
                 return writeToPaest(state);
